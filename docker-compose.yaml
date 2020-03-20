@@ -1,0 +1,84 @@
+version: '3'
+
+# Refs
+# https://docs.docker.com/engine/reference/run/
+# https://docs.docker.com/engine/reference/commandline/inspect/
+# https://docs.docker.com/compose/
+# https://hub.docker.com/_/mariadb
+
+# Environment vars: https://stackoverflow.com/questions/30494050/how-do-i-pass-environment-variables-to-docker-containers
+# 	docker run --env-file ./env.list ubuntu bash
+# each line to be in the format: VAR=VAL
+
+services:
+
+  # FPM Service
+  app:
+    build: .
+    image: php:fpm
+    container_name: app
+    restart: on-failure
+    tty: true
+    environment:
+      SERVICE_NAME: app
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      default:
+        aliases:
+          - myapp.localhost.com
+
+  # Nginx Service
+  webserver:
+    image: nginx:alpine
+    container_name: webserver
+    restart: on-failure
+    tty: true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      default:
+        aliases:
+          - myapp.localhost.com
+
+  #MySQL Service
+  db:
+    image: mariadb:10.4.12-bionic
+    container_name: db
+    # restart: unless-stopped
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: weatherapp
+      MYSQL_ROOT_PASSWORD: sharpspring
+      SERVICE_NAME: mysql
+    volumes:
+      - dbdata:/var/lib/mysql/
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
+    networks:
+      default:
+        aliases:
+          - myapp.localhost.com
+
+
+#networks:
+#  app-network:
+#    driver: bridge
+
+# docker network create myapp.localhost.com
+networks:
+  default:
+    external:
+      name: myapp.localhost.com
+
+volumes:
+  dbdata:
+    driver: local
