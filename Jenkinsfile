@@ -16,11 +16,14 @@ node("k8s") {
   stage("Deploy") {
     getKubeconfig()
     k8s_contexts = [
-      "andreisura-weatherapp"
+      "staging"
     ]
-    k8s_contexts.each { cluster ->
-      template(cluster: cluster)
-      sh("kubectl --context ${cluster} apply -f ./tmp-k8s")
+
+    withRepoKey {
+        k8s_contexts.each { cluster ->
+          template(cluster: cluster)
+          sh("kubectl --context ${cluster} apply -f ./tmp-k8s")
+        }
     }
   }
 }
