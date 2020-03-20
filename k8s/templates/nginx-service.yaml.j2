@@ -1,0 +1,23 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  # Note from step 32: matches the deployment name in nginx-deployment.yaml.j2
+  name: nginx
+  namespace: {{ namespace }}
+  labels:
+    role: nginx
+spec:
+  selector:
+    role: nginx
+  type: LoadBalancer
+  ports:
+  - port: 80
+    name: http
+    protocol: TCP
+    targetPort: http
+  loadBalancerSourceRanges:
+  # step 33 - restrict its access to the Gainesville office and the SharpSpring VPN
+  - 209.251.145.16/30
+  - 35.208.194.182/32
+

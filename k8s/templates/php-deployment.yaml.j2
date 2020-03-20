@@ -1,0 +1,59 @@
+{% macro deploy(mem_limit="100Mi", cpu_limit="100m") %}
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: php
+  namespace: {{ namespace }}
+  labels:
+    role: php
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      role: php
+  template:
+    metadata:
+      labels:
+        role: php
+    spec:
+      containers:
+      - name: php
+        # diff_id = git rev-parse --abbrev-ref HEAD
+        image: us.gcr.io/sharpspring-us/andreisura-weatherapp:{{ diff_id }}
+        imagePullPolicy: Always
+        #        env:
+        #        - name: ILLUMINATI_MAILING_ADDRESS
+        #          valueFrom:
+        #            secretKeyRef:
+        #              name: php
+        #              key: illuminati_mailing_address
+        #        - name: MEANING_OF_LIFE
+        #          valueFrom:
+        #            secretKeyRef:
+        #              name: php
+        #              key: meaning_of_life
+        ports:
+        - containerPort: 9000
+          name: http
+          protocol: TCP
+        resources:
+          requests:
+            cpu: "{{ cpu_limit }}"
+            memory: "{{ mem_limit }}"
+          limits:
+            cpu: "{{ cpu_limit }}"
+            memory: "{{ mem_limit }}"
+{% endmacro %}
+#{% if cluster == "staging" %}
+## Give staging smaller resources than production.
+#{%- set mem_limit="512Mi" %}
+#{%- set cpu_limit="250m" %}
+#{% else %}
+## Give not-staging (e.g. production) more resources.
+#{%- set mem_limit="1Gi" %}
+#{%- set cpu_limit="1" %}
+#{% endif %}
+# We created a macro that will output the above
+{{ deploy(mem_limit=mem_limit, cpu_limit=cpu_limit) }}
+# vim:ft=ansible:

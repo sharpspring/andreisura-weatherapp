@@ -1,0 +1,82 @@
+{% macro deploy(mem_limit="100Mi", cpu_limit="100m") %}
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: {{ namespace }}
+  labels:
+    role: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      role: nginx
+  template:
+    metadata:
+      labels:
+        role: nginx
+    spec:
+{% if cluster == "staging" %}
+      # The following "affinity" and "tolerations" blocks exist to schedule this
+      # container onto the "leaky" staging server. The "leaky" server has egress
+      # and ingress access to the public Internet. By default we want to
+      # restrict things running on the staging cluster to NOT have Internet
+      # access. This is because we don't want to accidentally send emails to
+      # customers, charge credit cards, etc. If you DO need Internet access, and
+      # are willing to assume the risk that that entails, then use this
+      # Deployment which has the appropriate affinity and toleration.
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: leaky
+                operator: In
+                values:
+                - "true"
+      tolerations:
+      - effect: NoSchedule
+        key: leaky
+        operator: Equal
+        value: "true"
+{% endif %}
+      containers:
+      - name: nginx
+        image: nginx:1.17
+        imagePullPolicy: Always
+        #        env:
+        #        - name: ILLUMINATI_MAILING_ADDRESS
+        #          valueFrom:
+        #            secretKeyRef:
+        #              name: nginx
+        #              key: illuminati_mailing_address
+        #        - name: MEANING_OF_LIFE
+        #          valueFrom:
+        #            secretKeyRef:
+        #              name: nginx
+        #              key: meaning_of_life
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        resources:
+          requests:
+            cpu: "{{ cpu_limit }}"
+            memory: "{{ mem_limit }}"
+          limits:
+            cpu: "{{ cpu_limit }}"
+            memory: "{{ mem_limit }}"
+{% endmacro %}
+#{% if cluster == "staging" %}
+## Give staging smaller resources than production.
+#{%- set mem_limit="512Mi" %}
+#{%- set cpu_limit="250m" %}
+#{% else %}
+## Give not-staging (e.g. production) more resources.
+#{%- set mem_limit="1Gi" %}
+#{%- set cpu_limit="1" %}
+#{% endif %}
+# We created a macro that will output the above
+{{ deploy(mem_limit=mem_limit, cpu_limit=cpu_limit) }}
+# vim:ft=ansible:
