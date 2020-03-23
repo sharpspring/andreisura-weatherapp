@@ -1,0 +1,36 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: import-weather-data
+  namespace: {{ namespace }}
+  labels:
+    role: import-weather-data
+spec:
+  # `Forbid`: Don't create a new job; just let the old one keep going (Only one job at a time)
+  # `Replace`: Delete the old job first, then make the new job (Only one job at a time)
+  # `Allow`: Just keep making more jobs (Possibly many jobs at any given time!)
+  concurrencyPolicy: Forbid
+
+  failedJobsHistoryLimit: 5
+  successfulJobsHistoryLimit: 0
+  # schedule: "0 */1 * * *"
+  schedule: "*/5 * * * *"
+
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+
+          # If Kube tries to kill the pod for any reason, this is how many
+          # seconds it will wait for the containers to exit gracefully before
+          # force-terminating.
+          terminationGracePeriodSeconds: 200
+
+          containers:
+          - name: php
+            image: us.gcr.io/sharpspring-us/andreisura-weatherapp:{{ diff_id }}
+            command:
+            - php
+            args:
+            - /var/www/site/cronjob.php
