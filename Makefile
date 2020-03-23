@@ -7,6 +7,7 @@ base=us.gcr.io/sharpspring-us/$(repo)
 branch=$${BRANCH_NAME:-`git rev-parse --abbrev-ref HEAD`}
 image=$(base):$(shorthash)
 
+
 # -- dev helpers
 pod=`kubectl --context=staging -n $(srv) get pods | tail -1 | cut -d ' ' -f1`
 run:
@@ -33,6 +34,15 @@ buildtest:
 
 
 # === sys
+# template is target which can be used to test Jinja templating locally.
+# It requires that you have the ansible repo cloned at ~/dev/ansible.
+# This target is not used by Jenkins!
+template=ANSIBLE_HASH_BEHAVIOUR=merge \
+		 ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.do \
+		 ANSIBLE_ACTION_PLUGINS=~/git/ansible/plugins/actions \
+		 ansible-playbook -e "cluster=${CLUSTER} basedir=${CURDIR}" -e "diff_id=`git rev-parse --short HEAD`" -i /dev/null ~/git/ansible/playbooks/template.yaml
+
+
 all: build release
 
 build:
@@ -42,3 +52,11 @@ build:
 release:
 	docker push $(image)
 	docker push $(base):$(branch)
+
+# Use this to test Jinja templating locally. This is not used by Jenkins!
+template:
+	$(template)
+
+# Use this to test Jinja templating locally. This is not used by Jenkins!
+template-without-secrets:
+	$(template) --tags=no_secrets
