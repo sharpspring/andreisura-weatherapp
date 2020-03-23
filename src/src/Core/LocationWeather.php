@@ -40,7 +40,7 @@ define('MYSQL_USERNAME', 'weatherapp');
 define('MYSQL_PASSWORD', 'checking*weather2gnv');
 
 // define('MYSQL_HOST', '127.0.0.1');
-define('MYSQL_HOST', 'db');
+define('MYSQL_HOST', 'mariadb');
 define('MYSQL_DB', 'weatherapp');
 
 define('API_KEY', 'd99c1caebdb1f6b0ee4eec5dff899182');
