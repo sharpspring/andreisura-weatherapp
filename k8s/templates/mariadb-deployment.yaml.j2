@@ -57,7 +57,7 @@ spec:
           - name: MYSQL_ROOT_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: mariadb
+                name: andreisura-weatherapp-secrets
                 # @see https://hub.docker.com/_/mariadb
                 key: mysql_root_password
         ports:

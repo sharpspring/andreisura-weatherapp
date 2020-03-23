@@ -26,6 +26,10 @@ k_stag_watch:
 	kubectl --context=staging -n $(srv) logs -f $(pod)
 k_stag_srv:
 	kubectl --context=staging -n $(srv) get services
+k_stag_cfg:
+	kubectl --context=staging -n $(srv) get configmaps
+k_stag_secrets:
+	kubectl --context=staging -n $(srv) get secrets
 
 
 buildtest:
