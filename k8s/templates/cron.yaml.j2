@@ -11,7 +11,7 @@ spec:
   # `Allow`: Just keep making more jobs (Possibly many jobs at any given time!)
   concurrencyPolicy: Forbid
 
-  failedJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 1
   successfulJobsHistoryLimit: 0
   # schedule: "0 */1 * * *"
   schedule: "*/5 * * * *"
@@ -25,7 +25,7 @@ spec:
           # If Kube tries to kill the pod for any reason, this is how many
           # seconds it will wait for the containers to exit gracefully before
           # force-terminating.
-          terminationGracePeriodSeconds: 200
+          terminationGracePeriodSeconds: 60
 
           containers:
           - name: php
