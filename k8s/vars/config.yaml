@@ -1,0 +1,9 @@
+config:
+  andreisura-weatherapp-config:
+    staging:
+      environment: staging
+    data:
+      environment: production
+      db.host: 'mariadb'
+      db.port: '3306'
+      db.user: 'weatherapp'

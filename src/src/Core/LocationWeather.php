@@ -7,54 +7,42 @@ use PDO;
 use PDOException;
 
 /*
-desc location;
-+-------------+--------------+------+-----+---------+----------------+
-| Field       | Type         | Null | Key | Default | Extra          |
-+-------------+--------------+------+-----+---------+----------------+
-| id          | bigint(20)   | NO   | PRI | NULL    | auto_increment |
-| city        | varchar(255) | NO   | MUL | NULL    |                |
-| stateCode   | char(2)      | NO   |     | NULL    |                |
-| countryCode | char(2)      | NO   |     | NULL    |                |
-+-------------+--------------+------+-----+---------+----------------+
-4 rows in set (0.01 sec)
-
-desc locationWeather;
-+------------------+---------------------+------+-----+---------------------+----------------+
-| Field            | Type                | Null | Key | Default             | Extra          |
-+------------------+---------------------+------+-----+---------------------+----------------+
-| id               | bigint(20) unsigned | NO   | PRI | NULL                | auto_increment |
-| locationID       | bigint(20) unsigned | NO   | MUL | NULL                |                |
-| weatherDate      | date                | NO   |     | NULL                |                |
-| weatherCondition | varchar(100)        | YES  |     | NULL                |                |
-| tempMax          | float               | YES  |     | NULL                |                |
-| tempMin          | float               | YES  |     | NULL                |                |
-| humidity         | float               | YES  |     | NULL                |                |
-| pressure         | float               | YES  |     | NULL                |                |
-| windSpeed        | float               | YES  |     | NULL                |                |
-| createTimestamp  | timestamp           | NO   |     | current_timestamp() |                |
-+------------------+---------------------+------+-----+---------------------+----------------+
-*/
-
 define('MYSQL_USERNAME', 'weatherapp');
-// define('MYSQL_USERNAME', 'root');
 define('MYSQL_PASSWORD', 'checking*weather2gnv');
 
-// define('MYSQL_HOST', '127.0.0.1');
 define('MYSQL_HOST', 'mariadb');
 define('MYSQL_DB', 'weatherapp');
 
 define('API_KEY', 'd99c1caebdb1f6b0ee4eec5dff899182');
 define('API_URL', 'http://api.openweathermap.org/data/2.5/weather?');
+*/
 
 class LocationWeather
 {
+    public static function getConfig() {
+        $config = [
+            'DB_NAME', 'weatherapp',            //note: not from k8s
+            'DB_HOST' => $_ENV['DB_HOST'],
+            'DB_PORT' => $_ENV['DB_PORT'],
+            'DB_USER' => $_ENV['DB_USER'],
+            'DB_PASSWORD' => $_ENV['DB_PASSWORD'],
+
+            'API_KEY' => 'd99c1caebdb1f6b0ee4eec5dff899182',
+            'API_URL' => 'http://api.openweathermap.org/data/2.5/weather?',
+        ];
+
+        return $config;
+    }
+
     // https://websitebeaver.com/php-pdo-prepared-statements-to-prevent-sql-injection
     // To prevent leaking passwords change production php.ini and restart Nginx
     //      display_errors = Off
     //      log_errors = On
     public static function connectToDB()
     {
-        $dsn = 'mysql:host=' . MYSQL_HOST . ';dbname=' . MYSQL_DB;
+        $config = self::getConfig();
+
+        $dsn = 'mysql:host=' . $config['DB_HOST'] . ';dbname=' . $config['DB_NAME'];
         $options = [
             PDO::ATTR_EMULATE_PREPARES => false, // turn off emulation mode for "real" prepared statements
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, //turn on errors in the form of exceptions
@@ -62,9 +50,9 @@ class LocationWeather
         ];
 
         try {
-            return new PDO($dsn, MYSQL_USERNAME, MYSQL_PASSWORD, $options);
+            return new PDO($dsn, $config['DB_USER'], $config['DB_PASSWORD'], $options);
         } catch (PDOException $e) {
-            throw new Exception("Failed to connect to: " . MYSQL_HOST . '/' . MYSQL_DB . ' due: ' . $e->getMessage());
+            throw new Exception("Failed to connect to: " . $config['DB_HOST'] . '/' . $config['DB_NAME'] . ' due: ' . $e->getMessage());
         }
     }
 

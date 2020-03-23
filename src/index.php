@@ -2,41 +2,19 @@
 // A single-page PHP script which displays the current weather conditions for
 // the configured location.
 
-define('MYSQL_USERNAME', 'weatherapp');
-define('MYSQL_PASSWORD', 'checking*weather2gnv');
-
-# define('MYSQL_HOST', '127.0.0.1');
-define('MYSQL_HOST', 'db');
-define('MYSQL_DB', 'weatherapp');
-
-define('API_KEY', 'd99c1caebdb1f6b0ee4eec5dff899182');
-define('API_URL', 'http://api.openweathermap.org/data/2.5/weather?');
-
-function connectToDB() {
-    return new PDO('mysql:host=' . MYSQL_HOST . ';dbname=' . MYSQL_DB, MYSQL_USERNAME, MYSQL_PASSWORD);
-}
+// require "autoload.php";
+use Core\LocationWeather;
 
 // returns an array[city_name, state_abbreviation]
 function getLocation() {
-
     try {
-    	$pdo = connectToDB();
-    	$stmt = $pdo->query('select city, stateCode, countryCode from location');
+    	$pdo = LocationWeather::connectToDB();
+    	$stmt = $pdo->query('SELECT city, stateCode, countryCode FROM location');
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
     catch (PDOException $e) {
-      throw new Exception("Failed to connect to: " . MYSQL_HOST . '/' . MYSQL_DB . ' due: ' . $e->getMessage());
+      throw new Exception("Failed to connect to the database due: " . $e->getMessage());
     }
-}
-
-function getCurrentConditions_old() {
-    $location = getLocation();
-    // TODO: use https://openweathermap.org/api to obtain the current weather
-    // for the saved location.
-    $allConditions = ["Hot", "Cold", "Snowy", "Windy", "Cloudy", "Rainy"];
-    $condition = $allConditions[array_rand($allConditions)];
-    $tempF = rand(32, 100);
-    return [$location, $condition, $tempF];
 }
 
 function getCurrentConditions($location, $lang, $unitsRequested) {
@@ -44,7 +22,8 @@ function getCurrentConditions($location, $lang, $unitsRequested) {
     $lang = $lang ?? 'en';
 
     // http://api.openweathermap.org/data/2.5/weather?q=London,uk&APPID=d99c1caebdb1f6b0ee4eec5dff899182
-    $url = API_URL . "q={$location}&lang={$lang}&units={$units}&APPID=". API_KEY;
+    $config = LocationWeather::getConfig();
+    $url = $config['API_URL'] . "q={$location}&lang={$lang}&units={$units}&APPID=". $config['API_KEY'];
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_HEADER, 0);

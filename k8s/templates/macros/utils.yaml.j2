@@ -1,0 +1,20 @@
+{% macro secrets_config_env(secrets_name) %}
+{% set data = secrets[secrets_name].data | default({}) | combine(secrets[secrets_name][cluster] | default({})) %}
+{% for key, value in data.items() %}
+- name: {{ key | upper | regex_replace('[-.]', '_') }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ secrets_name }}
+      key: {{ key }}
+{% endfor %}
+{% endmacro %}
+{% macro config_env(config_name) %}
+{% set data = config[config_name].data | default({}) | combine(config[config_name][cluster] | default({})) %}
+{% for key, value in data.items() %}
+{{ env_pair(key, value) }}
+{% endfor %}
+{% endmacro %}
+{% macro env_pair(key, value) %}
+- name: {{ key | upper | regex_replace('[-.]', '_') }}
+  value: {{ value | to_yaml() | replace('\n...\n', '') | trim }}
+{%- endmacro %}

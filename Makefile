@@ -61,6 +61,9 @@ release:
 template:
 	$(template)
 
+template-staging:
+	make CLUSTER=staging template
+
 # Use this to test Jinja templating locally. This is not used by Jenkins!
 template-without-secrets:
 	$(template) --tags=no_secrets
