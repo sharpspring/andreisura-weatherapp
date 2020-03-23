@@ -53,17 +53,13 @@ spec:
         volumeMounts:
         - name: mariadb-data-volume
           mountPath: /var/lib/mysql
-        #        env:
-        #        - name: ILLUMINATI_MAILING_ADDRESS
-        #          valueFrom:
-        #            secretKeyRef:
-        #              name: mariadb
-        #              key: illuminati_mailing_address
-        #        - name: MEANING_OF_LIFE
-        #          valueFrom:
-        #            secretKeyRef:
-        #              name: mariadb
-        #              key: meaning_of_life
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mariadb
+                # @see https://hub.docker.com/_/mariadb
+                key: mysql_root_password
         ports:
         - containerPort: 3306
           name: http

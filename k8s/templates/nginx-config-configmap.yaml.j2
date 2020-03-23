@@ -1,0 +1,32 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: {{ namespace }}
+data:
+  nginx.conf: |
+    error_log /dev/stdout notice;
+
+      server {
+        listen 80;
+
+        location = /healthz {
+          return 200;
+        }
+
+        root /var/www/site;
+        index index.php;
+
+        location / {
+            try_files $uri /index.php$is_args$args;
+        }
+
+        location ~ ^/.+\.php(/|$) {
+            # Note: "php" is the name of the container
+            fastcgi_pass php:9000;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        }
+      }
+
