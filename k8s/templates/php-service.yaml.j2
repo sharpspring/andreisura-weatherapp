@@ -1,0 +1,24 @@
+---
+# Web requests will be received by your Nginx Service, which will forward those
+# requests to your Nginx Pods, which will forward those requests to your PHP
+# Service, which will forward those requests to your PHP Pods. In this way,
+# your Nginx and FPM Pods can be scaled independently of each other. Your PHP
+# Service will look very similar to your MariaDB Service, except that it'll
+# handle requests on port 9000, which is the standard PHP-FPM port
+#
+#   http_request -> nginx_srv -> nginx_pod -> php_srv -> php_pod
+apiVersion: v1
+kind: Service
+metadata:
+  name: php
+  namespace: {{ namespace }}
+  labels:
+    role: php
+spec:
+  selector:
+    role: php
+  ports:
+  - port: 9000
+    name: php
+    protocol: TCP
+    targetPort: 9000

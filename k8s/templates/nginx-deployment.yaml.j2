@@ -17,6 +17,11 @@ spec:
       labels:
         role: nginx
     spec:
+      volumes:
+      - name: nginx-config-volume
+        configMap:
+          defaultMode: 420
+          name: nginx-config
 {% if cluster == "staging" %}
       # The following "affinity" and "tolerations" blocks exist to schedule this
       # container onto the "leaky" staging server. The "leaky" server has egress
@@ -45,6 +50,11 @@ spec:
       - name: nginx
         image: nginx:1.17
         imagePullPolicy: Always
+        volumeMounts:
+          # where to put the file https://github.com/sharpspring/yourname-weatherapp/blob/master/k8s/templates/nginx-config-configmap.yaml.j2
+        - mountPath: /etc/nginx/conf.d
+          name: nginx-config-volume
+          readOnly: true
         #        env:
         #        - name: ILLUMINATI_MAILING_ADDRESS
         #          valueFrom:
