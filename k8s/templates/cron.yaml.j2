@@ -13,8 +13,8 @@ spec:
   # `Allow`: Just keep making more jobs (Possibly many jobs at any given time!)
   concurrencyPolicy: Forbid
 
-  failedJobsHistoryLimit: 1
-  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 1
   # schedule: "0 */1 * * *"
   schedule: "*/5 * * * *"
 
@@ -22,7 +22,8 @@ spec:
     spec:
       template:
         spec:
-          restartPolicy: Never
+          # restartPolicy: Never
+          restartPolicy: OnFailure
 
           # If Kube tries to kill the pod for any reason, this is how many
           # seconds it will wait for the containers to exit gracefully before
