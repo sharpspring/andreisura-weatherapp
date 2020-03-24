@@ -1,3 +1,5 @@
+{% from 'macros/utils.yaml.j2' import secrets_config_env, config_env with context %}
+---
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
@@ -30,6 +32,15 @@ spec:
           containers:
           - name: php
             image: us.gcr.io/sharpspring-us/andreisura-weatherapp:{{ diff_id }}
+            env:
+            - name: NAMESPACE
+              value: {{ namespace }}
+            {{ config_env('andreisura-weatherapp-config') | indent(12) }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: andreisura-weatherapp-secrets
+                  key: db_password
             command:
             - php
             args:

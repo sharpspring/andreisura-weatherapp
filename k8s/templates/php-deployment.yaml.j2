@@ -1,5 +1,5 @@
 {% macro deploy(mem_limit="100Mi", cpu_limit="100m") %}
-# {% from 'macros/utils.yaml.j2' import secrets_config_env, config_env with context %}
+{% from 'macros/utils.yaml.j2' import secrets_config_env, config_env with context %}
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
