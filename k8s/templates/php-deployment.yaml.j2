@@ -45,6 +45,31 @@ spec:
           limits:
             cpu: "{{ cpu_limit }}"
             memory: "{{ mem_limit }}"
+{% if cluster == "staging" %}
+      # The following "affinity" and "tolerations" blocks exist to schedule this
+      # container onto the "leaky" staging server. The "leaky" server has egress
+      # and ingress access to the public Internet. By default we want to
+      # restrict things running on the staging cluster to NOT have Internet
+      # access. This is because we don't want to accidentally send emails to
+      # customers, charge credit cards, etc. If you DO need Internet access, and
+      # are willing to assume the risk that that entails, then use this
+      # Deployment which has the appropriate affinity and toleration.
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: leaky
+                operator: In
+                values:
+                - "true"
+      tolerations:
+      - effect: NoSchedule
+        key: leaky
+        operator: Equal
+        value: "true"
+{% endif %}
+
 {% endmacro %}
 #{% if cluster == "staging" %}
 ## Give staging smaller resources than production.
