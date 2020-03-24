@@ -2,14 +2,14 @@
 // A single-page PHP script which displays the current weather conditions for
 // the configured location.
 
-// require "autoload.php";
+require "autoload.php";
 use Core\LocationWeather;
 
-// returns an array[city_name, state_abbreviation]
+/*
 function getLocation() {
     try {
-    	$pdo = LocationWeather::connectToDB();
-    	$stmt = $pdo->query('SELECT city, stateCode, countryCode FROM location');
+        $pdo = LocationWeather::connectToDB();
+        $stmt = $pdo->query('SELECT city, stateCode, countryCode FROM weatherapp.location');
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
     catch (PDOException $e) {
@@ -38,17 +38,21 @@ function getCurrentConditions($location, $lang, $unitsRequested) {
     return $data;
 }
 
-
-// TODO: accept country in the url?
 $loc = getLocation();
 $locCountry = 'US';
 
 // Example: 'Gainesville,FL,US';
 $location = "{$loc['city']},{$loc['stateCode']},{$locCountry}";
+*/
+
+// TODO: accept country in the url?
+$location = LocationWeather::getLastLocation();
 
 $units = $_GET['units'] ?? null;
 $lang = $_GET['lang'] ?? null;
-$data = getCurrentConditions($location, $lang, $units);
+// $data = getCurrentConditions($location, $lang, $units);
+$data = LocationWeather::getCurrentConditions($location, $lang, $units);
+
 $unitsSpeed = $units === 'metric' ? 'meter/sec' : 'miles/hour';
 $unitsSymbol = $units === 'metric' ? 'C' : 'F';
 $t1Format = $units === 'metric' ? "l G:i" : "l g:i a";
@@ -84,7 +88,7 @@ $page = <<<END
 <!doctype html>
 <html>
     <head>
-	<title>Weather Conditionis</title>
+    <title>Weather Conditionis</title>
 
 <style>
 

@@ -6,27 +6,18 @@ use Exception;
 use PDO;
 use PDOException;
 
-/*
-define('MYSQL_USERNAME', 'weatherapp');
-define('MYSQL_PASSWORD', 'checking*weather2gnv');
-
-define('MYSQL_HOST', 'mariadb');
-define('MYSQL_DB', 'weatherapp');
-
-define('API_KEY', 'd99c1caebdb1f6b0ee4eec5dff899182');
-define('API_URL', 'http://api.openweathermap.org/data/2.5/weather?');
-*/
-
 class LocationWeather
 {
     public static function getConfig() {
         $config = [
-            'DB_NAME', 'weatherapp',            //note: not from k8s
-            'DB_HOST' => $_ENV['DB_HOST'],
-            'DB_PORT' => $_ENV['DB_PORT'],
-            'DB_USER' => $_ENV['DB_USER'],
+            // from k8s
+            'DB_HOST' => $_ENV['DB_HOST'] ?? 'mariadb',
+            'DB_PORT' => $_ENV['DB_PORT'] ?? '3306',
+            'DB_USER' => $_ENV['DB_USER'] ?? 'weatherapp',
             'DB_PASSWORD' => $_ENV['DB_PASSWORD'],
 
+            // not from k8s
+            'DB_NAME', 'weatherapp',
             'API_KEY' => 'd99c1caebdb1f6b0ee4eec5dff899182',
             'API_URL' => 'http://api.openweathermap.org/data/2.5/weather?',
         ];
@@ -67,7 +58,7 @@ class LocationWeather
         try {
             $pdo = self::connectToDB();
             $sql = "SELECT id, city, stateCode, countryCode
-                    FROM location
+                    FROM weatherapp.location
                     WHERE id = :id";
 
             $stmt = $pdo->prepare($sql)->execute([':id' => $locationID]);
@@ -82,7 +73,7 @@ class LocationWeather
         try {
             $pdo = self::connectToDB();
             $sql = "SELECT id, city, stateCode, countryCode
-                    FROM location
+                    FROM weatherapp.location
                     ORDER BY id DESC LIMIT 1";
 
             // $stmt = $pdo->prepare($sql)->execute([]);
@@ -139,8 +130,9 @@ class LocationWeather
 
         $locationStr = self::formatLocation($location);
 
+        $config = self::getConfig();
         // http://api.openweathermap.org/data/2.5/weather?q=London,uk&APPID=d99c1caebdb1f6b0ee4eec5dff899182
-        $url = API_URL . "q={$locationStr}&lang={$lang}&units={$units}&APPID=" . API_KEY;
+        $url = $config['API_URL'] . "q={$locationStr}&lang={$lang}&units={$units}&APPID=" . $config['API_KEY'];
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -162,7 +154,7 @@ class LocationWeather
 
         try {
             $pdo = self::connectToDB();
-            $sql = "INSERT INTO locationWeather
+            $sql = "INSERT INTO weatherapp.locationWeather
                         (locationID, weatherTimestamp, weatherCondition
                         , tempMin, temp, tempMax, humidity, pressure, windSpeed
                         )
