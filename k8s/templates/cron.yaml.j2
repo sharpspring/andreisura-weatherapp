@@ -13,6 +13,11 @@ spec:
   # `Allow`: Just keep making more jobs (Possibly many jobs at any given time!)
   concurrencyPolicy: Forbid
 
+  # https://kubernetes.io/docs/tasks/job/automated-tasks-with-cron-jobs/
+  # Debug using:
+  #     $ kubectl --context=staging -n andreisura-weatherapp describe cronjob
+  startingDeadlineSeconds: 300
+
   failedJobsHistoryLimit: 3
   successfulJobsHistoryLimit: 1
   # schedule: "0 */1 * * *"
