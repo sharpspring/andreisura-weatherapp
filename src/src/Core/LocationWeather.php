@@ -17,7 +17,7 @@ class LocationWeather
             'DB_PASSWORD' => $_ENV['DB_PASSWORD'],
 
             // not from k8s
-            'DB_NAME', 'weatherapp',
+            'DB_NAME' => 'weatherapp',
             'API_KEY' => 'd99c1caebdb1f6b0ee4eec5dff899182',
             'API_URL' => 'http://api.openweathermap.org/data/2.5/weather?',
         ];
